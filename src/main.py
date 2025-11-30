@@ -110,7 +110,8 @@ def fourier_transform(image:np.array):
 
 
 if __name__ == "__main__":
-    (originalImage,rgb)=loadImage("../samples/22013.jpg")
+    filename="25098"
+    (originalImage,rgb)=loadImage(f"../samples/{filename}.jpg")
     gray = rgb_to_gray(rgb)
     negative = negative_image(gray)
     threshold= int(input("Enter threshold value (0-255): "))
@@ -143,5 +144,5 @@ if __name__ == "__main__":
     plt.subplot(3, 4, 10); plt.title("FFT Phase"); plt.imshow(phase, cmap='gray'); plt.axis('off')
 
     plt.tight_layout()
-    plt.savefig("../outputs/image_processing_results.png")
+    plt.savefig(f"../outputs/image_processing_results_{filename}.png")
     plt.show()

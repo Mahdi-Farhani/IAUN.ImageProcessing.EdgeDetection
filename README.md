@@ -27,9 +27,9 @@ Conversion from an RGB image **I**<sub>rgb</sub> to a single-channel grayscale i
 
 For a pixel **(_x, y_)** with color channels **R, G, B**:
 
-        **I**<sub>gray</sub>**(x, y)** = 0.299 . **_R_**(x, y) + 0.587 . **_G_**(x, y) + 0.114 . **_B_**(x, y)  
-        
-        This ensures the resulting grayscale image preserves perceived brightness correctly.
+**I**<sub>gray</sub>**(x, y)** = 0.299 . **_R_**(x, y) + 0.587 . **_G_**(x, y) + 0.114 . **_B_**(x, y)  
+
+This ensures the resulting grayscale image preserves perceived brightness correctly.
 
 **2. Negative Transformation A pointwise intensity inversion:**
 

@@ -63,6 +63,41 @@ def apply_otsu_thresholding(gray:np.array):
     binary = thresholding_binary(gray, threshold)
     return binary, threshold
 
+def convolution2d(image:np.array, kernel:np.array):
+    image_height, image_width = image.shape
+    kernel_height, kernel_width = kernel.shape
+
+    pad_height = kernel_height // 2
+    pad_width = kernel_width // 2
+
+    padded_image = np.pad(image, ((pad_height, pad_height), (pad_width, pad_width)), mode='constant', constant_values=0)
+
+    output = np.zeros_like(image)
+
+    for i in range(image_height):
+        for j in range(image_width):
+            region = padded_image[i:i + kernel_height, j:j + kernel_width]
+            output[i, j] = np.sum(region * kernel)
+
+    return output
+
+def average_filter(image:np.array, filter_size:int=3):
+    kernel = np.ones((filter_size, filter_size), dtype=np.float32) / (filter_size * filter_size)
+    blurred= convolution2d(image, kernel)
+    return np.clip(blurred, 0, 255).astype(np.uint8)
+
+def laplacian_filter(image:np.array):
+    kernel = np.array([[0, -1, 0],
+                       [-1, 4, -1],
+                       [0, -1, 0]], dtype=np.float32)
+    laplacian= convolution2d(image, kernel)
+    
+    laplacian=laplacian-laplacian.min()
+    laplacian=laplacian*(255/laplacian.max())
+
+    return laplacian.astype(np.uint8)
+
+
 if __name__ == "__main__":
     (originalImage,rgb)=loadImage("../samples/22013.jpg")
     gray = rgb_to_gray(rgb)
@@ -76,12 +111,18 @@ if __name__ == "__main__":
     print("Otsu Threshold =", otsu_threshold)
 
 
-    plt.figure(figsize=(18,8))
+    average = average_filter(gray, filter_size=3)
+    laplacian = laplacian_filter(gray)
+
+
+    plt.figure(figsize=(30,8))
     plt.subplot(2, 4, 1); plt.title("Original"); plt.imshow(rgb.astype(np.uint8)); plt.axis('off')
     plt.subplot(2, 4, 2); plt.title("Grayscale"); plt.imshow(gray, cmap='gray'); plt.axis('off')
     plt.subplot(2, 4, 3); plt.title("Negative"); plt.imshow(negative, cmap='gray'); plt.axis('off')
     plt.subplot(2, 4, 4); plt.title(f"Binary (t:{threshold})"); plt.imshow(binary, cmap='gray'); plt.axis('off')    
     plt.subplot(2, 4, 5); plt.title("Histogram"); plt.hist(gray.flatten(), bins=256)
+    plt.subplot(2, 4, 6); plt.title("Average Filter (Low-Pass)"); plt.imshow(average, cmap='gray'); plt.axis('off')
+    plt.subplot(2, 4, 7); plt.title("Laplacian Filter (High-Pass)"); plt.imshow(laplacian, cmap='gray'); plt.axis('off')
     plt.subplot(2, 4, 8); plt.title(f"Otsu Binary (t:{otsu_threshold})"); plt.imshow(binary_otsu, cmap='gray'); plt.axis('off')    
 
 

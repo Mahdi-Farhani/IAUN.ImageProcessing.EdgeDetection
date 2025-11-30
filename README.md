@@ -23,84 +23,84 @@ The pipeline includes:
 
 **1. Grayscale Conversion (Luminance Method)**
 
-        Conversion from an RGB image **I**<sub>rgb</sub> to a single-channel grayscale image **I**<sub>gray</sub> is performed using the standard ITU-R BT.601 luma definition, which accounts for human visual sensitivity to different color components.
+Conversion from an RGB image **I**<sub>rgb</sub> to a single-channel grayscale image **I**<sub>gray</sub> is performed using the standard ITU-R BT.601 luma definition, which accounts for human visual sensitivity to different color components.
+
+        For a pixel **(_x, y_)** with color channels **R, G, B**:
         
-                For a pixel **(_x, y_)** with color channels **R, G, B**:
+                **I**<sub>gray</sub>**(x, y)** = 0.299 . **_R_**(x, y) + 0.587 . **_G_**(x, y) + 0.114 . **_B_**(x, y)  
                 
-                    **I**<sub>gray</sub>**(x, y)** = 0.299 . **_R_**(x, y) + 0.587 . **_G_**(x, y) + 0.114 . **_B_**(x, y)  
-                    
-                    This ensures the resulting grayscale image preserves perceived brightness correctly.
+                This ensures the resulting grayscale image preserves perceived brightness correctly.
 
 **2. Negative Transformation A pointwise intensity inversion:**
 
-        The negative transformation inverts the intensity values of an image. If the maximum intensity level is  **L**<sub>max</sub> = 255:
-        
-        Negative(x, y) = L<sub>max</sub> - I(x, y) = 255 − I(x, y)
+The negative transformation inverts the intensity values of an image. If the maximum intensity level is  **L**<sub>max</sub> = 255:
 
-        This is crucial for visualizing subtle details often hidden in dark regions of an image.
+Negative(x, y) = L<sub>max</sub> - I(x, y) = 255 − I(x, y)
+
+This is crucial for visualizing subtle details often hidden in dark regions of an image.
 
 
 **3. Thresholding Binary thresholding with user‑specified T:**
 
-        Thresholding converts a grayscale image into a binary image based on a manually set threshold value (T).
-        
-        Thresholded(x,y)= 0 if I(x,y) < T    , 255 if I(x,y)≥T 
+Thresholding converts a grayscale image into a binary image based on a manually set threshold value (T).
+
+Thresholded(x,y)= 0 if I(x,y) < T    , 255 if I(x,y)≥T 
         
 
 
 **4. Average Filter (Low‑Pass) Pure manual convolution with an N×N kernel (default: 3×3):**
-        Spatial filtering is implemented via manual 2D convolution, where the image is scanned by a kernel (or mask).
-        The output pixel value is the weighted sum of the neighborhood pixels determined by the kernel coefficients.
+Spatial filtering is implemented via manual 2D convolution, where the image is scanned by a kernel (or mask).
+The output pixel value is the weighted sum of the neighborhood pixels determined by the kernel coefficients.
 
-        **4.1. Average Filter (Low‑Pass Smoothing)**
+**4.1. Average Filter (Low‑Pass Smoothing)**
 
-                The Average filter is a smoothing filter used to reduce noise by averaging the intensities of neighboring pixels. For an (N x N) kernel:
+        The Average filter is a smoothing filter used to reduce noise by averaging the intensities of neighboring pixels. For an (N x N) kernel:
 
-                Kernel<sub>avg</sub>[i][j] = 1/N<sup>2</sup>  for all  i, j in [1,....,N ]
-                
-                For a standard 3x3 kernel, every element is (1/9).
+        Kernel<sub>avg</sub>[i][j] = 1/N<sup>2</sup>  for all  i, j in [1,....,N ]
+        
+        For a standard 3x3 kernel, every element is (1/9).
 
 
 
-        **4.2. Laplacian Filter (High‑Pass) Implemented manually using the classic kernel:**
-            The Laplacian operator is a second-order derivative filter that highlights regions of rapid intensity change (edges). It is applied symmetrically around the center pixel. A common 3 x 3 implementation is:
+**4.2. Laplacian Filter (High‑Pass) Implemented manually using the classic kernel:**
+        The Laplacian operator is a second-order derivative filter that highlights regions of rapid intensity change (edges). It is applied symmetrically around the center pixel. A common 3 x 3 implementation is:
 
-            ``` 
-             0  -1   0
-            -1   4  -1
-             0  -1   0
-            ```
+        ``` 
+        0  -1   0
+        -1   4  -1
+        0  -1   0
+        ```
 
-            The output of convolution with this kernel often requires renormalization or clipping to fit within the 0-255 range, as the results can be negative or exceed 255.
+        The output of convolution with this kernel often requires renormalization or clipping to fit within the 0-255 range, as the results can be negative or exceed 255.
 **5. Zero Padding (Border Handling and FFT Preparation)**
-    Zero padding is essential for two primary reasons in this pipeline:
+Zero padding is essential for two primary reasons in this pipeline:
 
-        **1- Boundary Conditions in Convolution:** To compute the filtered output pixel at the very edge of the image without losing information due to the kernel extending beyond the image boundary, the image matrix is typically padded with zeros.
+**1- Boundary Conditions in Convolution:** To compute the filtered output pixel at the very edge of the image without losing information due to the kernel extending beyond the image boundary, the image matrix is typically padded with zeros.
 
-        **2- FFT Resolution:** When preparing an image for the 2D FFT, zero-padding the input to dimensions that are powers of two (or significantly larger than the original image) can sometimes improve spectral resolution visualization or satisfy requirements for specific FFT implementations, although the core NumPy FFT handles non-power-of-two sizes efficiently. Padding to match the size of the convolution kernel is often necessary for accurate spatial domain filtering reconstruction via the frequency domain (Convolution Theorem).
+**2- FFT Resolution:** When preparing an image for the 2D FFT, zero-padding the input to dimensions that are powers of two (or significantly larger than the original image) can sometimes improve spectral resolution visualization or satisfy requirements for specific FFT implementations, although the core NumPy FFT handles non-power-of-two sizes efficiently. Padding to match the size of the convolution kernel is often necessary for accurate spatial domain filtering reconstruction via the frequency domain (Convolution Theorem).
 
 **6. Fourier Transform (Frequency Domain Analysis)**
 
-        The 2D Discrete Fourier Transform (DFT), computed efficiently using the 2D Fast Fourier Transform (FFT), transforms the image from the spatial domain **(x, y)** to the frequency domain **(u, v)**.
+The 2D Discrete Fourier Transform (DFT), computed efficiently using the 2D Fast Fourier Transform (FFT), transforms the image from the spatial domain **(x, y)** to the frequency domain **(u, v)**.
 
-        The resulting complex output **F(u, v)** contains magnitude and phase information.
+The resulting complex output **F(u, v)** contains magnitude and phase information.
 
-        **Magnitude Spectrum**
+**Magnitude Spectrum**
 
-        The magnitude spectrum **M(u, v)** reveals the distribution of energy across different frequencies:
+The magnitude spectrum **M(u, v)** reveals the distribution of energy across different frequencies:
+
+M(u, v) = sqrt(Real(F(u, v))^2 + Image(F(u, v))^2)
+
+        For visualization, the DC component (zero frequency) is typically shifted to the center using the FFT shift operation. 
+        A logarithmic scaling is usually applied to compress the high dynamic range:
         
-        M(u, v) = sqrt(Real(F(u, v))^2 + Image(F(u, v))^2)
-        
-         For visualization, the DC component (zero frequency) is typically shifted to the center using the FFT shift operation. 
-         A logarithmic scaling is usually applied to compress the high dynamic range:
-         
-         Visualization = log(1 + M<sub>shifted</sub>(u, v)) 
+        Visualization = log(1 + M<sub>shifted</sub>(u, v)) 
 
-        **Phase Spectrum**
+**Phase Spectrum**
 
-        The phase spectrum **P(u, v)** determines the spatial localization of the features in the image:
+The phase spectrum **P(u, v)** determines the spatial localization of the features in the image:
 
-        P(u, v) = arctan (Image(F(u, v)) / Real(F(u, v)))
+P(u, v) = arctan (Image(F(u, v)) / Real(F(u, v)))
 
 ---
 
@@ -110,32 +110,32 @@ This project relies on standard scientific Python libraries for array manipulati
 
 **Prerequisites**
 
-        Ensure you have Python 3.8 or newer installed.
+Ensure you have Python 3.8 or newer installed.
 
-        Required Libraries
+Required Libraries
 
-        The following libraries must be installed into your environment:
+The following libraries must be installed into your environment:
 
-        ```
-        pip install numpy matplotlib pillow
-        ```
+```
+pip install numpy matplotlib pillow
+```
 
-        NumPy: Fundamental library for efficient array operations, critical for matrix manipulations in convolution and FFT.
-
-
-        Matplotlib: Used for plotting and visualizing the input, intermediate, and final processed images.
+NumPy: Fundamental library for efficient array operations, critical for matrix manipulations in convolution and FFT.
 
 
-        Pillow (PIL): Used for loading and saving standard image formats.
-
-        Execution
-
-        To run the entire pipeline with default settings (or settings defined within main.py):
-
-        ```python main.py```
+Matplotlib: Used for plotting and visualizing the input, intermediate, and final processed images.
 
 
-        The script is expected to load input_image.png, apply the sequential transformations, and display the results in separate windows or save them to disk.
+Pillow (PIL): Used for loading and saving standard image formats.
+
+Execution
+
+To run the entire pipeline with default settings (or settings defined within main.py):
+
+```python main.py```
+
+
+The script is expected to load input_image.png, apply the sequential transformations, and display the results in separate windows or save them to disk.
 
 
 **📌 Implementation Constraints and Notes**

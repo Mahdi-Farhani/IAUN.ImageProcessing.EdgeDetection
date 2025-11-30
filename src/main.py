@@ -97,6 +97,17 @@ def laplacian_filter(image:np.array):
 
     return laplacian.astype(np.uint8)
 
+def fourier_transform(image:np.array):
+    f = np.fft.fft2(image)
+    fshift = np.fft.fftshift(f)
+
+    magnitude = np.abs(fshift)
+    phase = np.angle(fshift)
+
+    magnitude_log = np.log(1 + magnitude)
+
+    return fshift, magnitude_log, phase
+
 
 if __name__ == "__main__":
     (originalImage,rgb)=loadImage("../samples/22013.jpg")
@@ -114,16 +125,23 @@ if __name__ == "__main__":
     average = average_filter(gray, filter_size=3)
     laplacian = laplacian_filter(gray)
 
-
-    plt.figure(figsize=(30,8))
-    plt.subplot(2, 4, 1); plt.title("Original"); plt.imshow(rgb.astype(np.uint8)); plt.axis('off')
-    plt.subplot(2, 4, 2); plt.title("Grayscale"); plt.imshow(gray, cmap='gray'); plt.axis('off')
-    plt.subplot(2, 4, 3); plt.title("Negative"); plt.imshow(negative, cmap='gray'); plt.axis('off')
-    plt.subplot(2, 4, 4); plt.title(f"Binary (t:{threshold})"); plt.imshow(binary, cmap='gray'); plt.axis('off')    
-    plt.subplot(2, 4, 5); plt.title("Histogram"); plt.hist(gray.flatten(), bins=256)
-    plt.subplot(2, 4, 6); plt.title("Average Filter (Low-Pass)"); plt.imshow(average, cmap='gray'); plt.axis('off')
-    plt.subplot(2, 4, 7); plt.title("Laplacian Filter (High-Pass)"); plt.imshow(laplacian, cmap='gray'); plt.axis('off')
-    plt.subplot(2, 4, 8); plt.title(f"Otsu Binary (t:{otsu_threshold})"); plt.imshow(binary_otsu, cmap='gray'); plt.axis('off')    
+    F_shift, magnitude_log, phase = fourier_transform(gray)
 
 
+    plt.figure(figsize=(20,12))
+    plt.subplot(3, 4, 1); plt.title("Original"); plt.imshow(rgb.astype(np.uint8)); plt.axis('off')
+    plt.subplot(3, 4, 2); plt.title("Grayscale"); plt.imshow(gray, cmap='gray'); plt.axis('off')
+    plt.subplot(3, 4, 3); plt.title("Negative"); plt.imshow(negative, cmap='gray'); plt.axis('off')
+    plt.subplot(3, 4, 4); plt.title(f"Binary (t:{threshold})"); plt.imshow(binary, cmap='gray'); plt.axis('off')    
+
+    plt.subplot(3, 4, 5); plt.title("Histogram"); plt.hist(gray.flatten(), bins=256)
+    plt.subplot(3, 4, 6); plt.title("Average Filter (Low-Pass)"); plt.imshow(average, cmap='gray'); plt.axis('off')
+    plt.subplot(3, 4, 7); plt.title("Laplacian Filter (High-Pass)"); plt.imshow(laplacian, cmap='gray'); plt.axis('off')
+    plt.subplot(3, 4, 8); plt.title(f"Otsu Binary (t:{otsu_threshold})"); plt.imshow(binary_otsu, cmap='gray'); plt.axis('off')    
+
+    plt.subplot(3, 4, 9); plt.title("FFT Magnitude (log)"); plt.imshow(magnitude_log, cmap='gray'); plt.axis('off')
+    plt.subplot(3, 4, 10); plt.title("FFT Phase"); plt.imshow(phase, cmap='gray'); plt.axis('off')
+
+    plt.tight_layout()
+    plt.savefig("../outputs/image_processing_results.png")
     plt.show()

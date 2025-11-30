@@ -25,11 +25,11 @@ The pipeline includes:
 
 Conversion from an RGB image **I**<sub>rgb</sub> to a single-channel grayscale image **I**<sub>gray</sub> is performed using the standard ITU-R BT.601 luma definition, which accounts for human visual sensitivity to different color components.
 
-        For a pixel **(_x, y_)** with color channels **R, G, B**:
+For a pixel **(_x, y_)** with color channels **R, G, B**:
+
+        **I**<sub>gray</sub>**(x, y)** = 0.299 . **_R_**(x, y) + 0.587 . **_G_**(x, y) + 0.114 . **_B_**(x, y)  
         
-                **I**<sub>gray</sub>**(x, y)** = 0.299 . **_R_**(x, y) + 0.587 . **_G_**(x, y) + 0.114 . **_B_**(x, y)  
-                
-                This ensures the resulting grayscale image preserves perceived brightness correctly.
+        This ensures the resulting grayscale image preserves perceived brightness correctly.
 
 **2. Negative Transformation A pointwise intensity inversion:**
 
@@ -54,24 +54,24 @@ The output pixel value is the weighted sum of the neighborhood pixels determined
 
 **4.1. Average Filter (Low‑Pass Smoothing)**
 
-        The Average filter is a smoothing filter used to reduce noise by averaging the intensities of neighboring pixels. For an (N x N) kernel:
+The Average filter is a smoothing filter used to reduce noise by averaging the intensities of neighboring pixels. For an (N x N) kernel:
 
-        Kernel<sub>avg</sub>[i][j] = 1/N<sup>2</sup>  for all  i, j in [1,....,N ]
-        
-        For a standard 3x3 kernel, every element is (1/9).
+Kernel<sub>avg</sub>[i][j] = 1/N<sup>2</sup>  for all  i, j in [1,....,N ]
+
+For a standard 3x3 kernel, every element is (1/9).
 
 
 
 **4.2. Laplacian Filter (High‑Pass) Implemented manually using the classic kernel:**
-        The Laplacian operator is a second-order derivative filter that highlights regions of rapid intensity change (edges). It is applied symmetrically around the center pixel. A common 3 x 3 implementation is:
+The Laplacian operator is a second-order derivative filter that highlights regions of rapid intensity change (edges). It is applied symmetrically around the center pixel. A common 3 x 3 implementation is:
 
-        ``` 
-        0  -1   0
-        -1   4  -1
-        0  -1   0
-        ```
+``` 
+0  -1   0
+-1   4  -1
+0  -1   0
+```
 
-        The output of convolution with this kernel often requires renormalization or clipping to fit within the 0-255 range, as the results can be negative or exceed 255.
+The output of convolution with this kernel often requires renormalization or clipping to fit within the 0-255 range, as the results can be negative or exceed 255.
 **5. Zero Padding (Border Handling and FFT Preparation)**
 Zero padding is essential for two primary reasons in this pipeline:
 
@@ -91,10 +91,10 @@ The magnitude spectrum **M(u, v)** reveals the distribution of energy across dif
 
 M(u, v) = sqrt(Real(F(u, v))^2 + Image(F(u, v))^2)
 
-        For visualization, the DC component (zero frequency) is typically shifted to the center using the FFT shift operation. 
-        A logarithmic scaling is usually applied to compress the high dynamic range:
-        
-        Visualization = log(1 + M<sub>shifted</sub>(u, v)) 
+For visualization, the DC component (zero frequency) is typically shifted to the center using the FFT shift operation. 
+A logarithmic scaling is usually applied to compress the high dynamic range:
+
+Visualization = log(1 + M<sub>shifted</sub>(u, v)) 
 
 **Phase Spectrum**
 

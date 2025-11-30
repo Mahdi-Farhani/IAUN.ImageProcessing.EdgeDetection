@@ -157,5 +157,28 @@ Convolution Implementation Detail
 
 The manual convolution in filters.py must handle the creation of the padded image array first, then iterate through every pixel of the original image size, centering the kernel over the corresponding padded region, calculating the weighted sum, and placing the result in the output array.
 
+### 📊Dataset
+Dataset Reference
+If you use the Berkeley Segmentation Dataset (BSDS300/BSDS500) in your experiments, please cite the original publication:
+```
+@InProceedings{MartinFTM01,
+  author    = {D. Martin and C. Fowlkes and D. Tal and J. Malik},
+  title     = {A Database of Human Segmented Natural Images and its Application
+               to Evaluating Segmentation Algorithms and Measuring Ecological Statistics},
+  booktitle = {Proc. 8th Int'l Conf. Computer Vision},
+  year      = {2001},
+  month     = {July},
+  volume    = {2},
+  pages     = {416--423}
+}
+```
+Alternatively, in plain text:
+
+Martin, D., Fowlkes, C., Tal, D., & Malik, J. (2001).
+
+A Database of Human Segmented Natural Images and its Application to Evaluating Segmentation Algorithms and Measuring Ecological Statistics.
+
+In Proc. ICCV, vol. 2, pp. 416–423.
+
 ### 📄 License
 This project is intended for academic use. Redistribution or reuse must comply with university rules.
